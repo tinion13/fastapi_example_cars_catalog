@@ -1,0 +1,6 @@
+fastapi[standard]
+SQLAlchemy
+passlib[bcrypt] 
+python-jose[cryptography]
+aiosqlite
+ruff
