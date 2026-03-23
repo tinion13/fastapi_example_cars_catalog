@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+{% if error %}
+  <p>{{ error }}</p>
+{% endif %}
+
+{% if _user %}
+  <h1>Беседа с {{ _user.username }} (ID {{ _user.id }})</h1>
+  <a href="/admin/conversations">← все беседы</a>
+  <hr>
+  <div>
+    {% if messages %}
+      {% for message in messages %}
+      <div class="{% if message.sender_is_admin %}admin{% else %}user{% endif %}">
+        <div>
+          <small>{{ message.created_at }} — {% if message.sender_is_admin %}Админ{% else %}Пользователь{% endif %}</small>
+        </div>
+        <div>{{ message.text }}</div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p>Сообщений ещё нет.</p>
+    {% endif %}
+  </div>
+
+  <hr>
+  <form method="post" action="/admin/conversations/{{ admin.id }}/reply">
+    <textarea name="text" rows="3" required placeholder="Ответ админа..."></textarea><br>
+    <button type="submit">Отправить ответ</button>
+  </form>
+{% endif %}
+
+<p><a href="/admin/conversations">Назад</a></p>
+{% endblock %}

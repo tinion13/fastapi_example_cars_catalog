@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>{{ title or "Cars Catalog" }}</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link href="/static/styles.css" rel="stylesheet">
+  <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+</head>
+<body>
+  <header>
+    <a href="/">Cars Catalog</a>
+    <nav>
+      <a href="/cars">Каталог</a>
+      {% if user is defined and user or admin is defined %}
+        {% if user is defined and user.is_admin or admin is defined%}
+          <a href="/admin/" class="admin">Админка</a>
+        {% endif %}
+        <a href="/profile" class="{% if user is defined and user.is_admin or admin %}admin{% endif %}">{% if user is defined %}{{ user.username }}{% else %}{{ admin.username }}{% endif %}</a>
+        <a href="/messages">Чат с поддержкой</a>
+        <form action="/logout" method="post" style="display:inline;">
+          <button type="submit">Выйти</button>
+        </form>
+      {% else %}
+      <a href="/login">Вход</a>
+      <a href="/register">Регистрация</a>     
+      {% endif %}
+    </nav>
+  </header>
+
+  <main class="site">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer>
+    <p>Cars Catalog©</p>
+  </footer>
+</body>
+</html>

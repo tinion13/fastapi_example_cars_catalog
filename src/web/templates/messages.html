@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Мои обращения</h1>
+
+<form method="post" action="/messages">
+  <textarea name="text" rows="4" required placeholder="Опишите ваш вопрос..."></textarea><br>
+  <button type="submit">Отправить</button>
+</form>
+
+<hr>
+<ul>
+  {% if messages %}
+    {% for message in messages %}
+      <li class="{% if message.sender_is_admin %}admin{% endif %}">
+        <div><small>{{ message.created_at }}</small>
+          {% if message.sender_is_admin %}
+            <b>Админ:</b> {{ message.text }}
+          {% else %}
+            <b>Вы:</b> {{ message.text }}
+          {% endif %}
+        </div>
+      </li>
+    {% endfor %}
+  {% else %}
+    <li>У вас нет сообщений.</li>
+  {% endif %}
+</ul>
+
+{% endblock %}

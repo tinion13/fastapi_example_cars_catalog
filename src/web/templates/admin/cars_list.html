@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>Управление автомобилями</h1>
+<a href="/admin">Назад</a>
+<a href="/admin/cars/new">Добавить машину</a>
+
+<form method="get" action="/admin/cars">
+    <div>
+        <label>Бренд <input type="text" name="brand" value="{{ request.query_params.get('brand','') }}"></label>
+        <label>Модель <input type="text" name="model" value="{{ request.query_params.get('model','') }}"></label>
+
+        <fieldset>
+            <legend>Тип кузова</legend>
+            {% for bt in ['седан', 'хэтчбек', 'внедорожник', 'универсал', 'купе', 'лифтбек'] %}
+            <label>
+                <input type="checkbox" name="body_type" value="{{ bt }}" {% if bt in
+                    request.query_params.getlist('body_type') %}checked{% endif %}>
+                {{ bt|capitalize }}
+            </label>
+            {% endfor %}
+        </fieldset>
+
+        <fieldset>
+            <legend>Топливо</legend>
+            {% for f in ['бензин', 'дизель', 'гибрид', 'электро', 'газ'] %}
+            <label>
+                <input type="checkbox" name="fuel" value="{{ f }}" {% if f in request.query_params.getlist('fuel')
+                    %}checked{% endif %}>
+                {{ f|capitalize }}
+            </label>
+            {% endfor %}
+        </fieldset>
+
+        <fieldset>
+            <legend>КПП</legend>
+            {% for t in ['автомат', 'механика', 'вариатор', 'робот'] %}
+            <label>
+                <input type="checkbox" name="transmission" value="{{ t }}" {% if t in
+                    request.query_params.getlist('transmission') %}checked{% endif %}>
+                {{ t|capitalize }}
+            </label>
+            {% endfor %}
+        </fieldset>
+
+        <label>Год от <input type="number" name="year_min" value="{{ request.query_params.get('year_min','') }}"
+                min="1980" max="3000"></label>
+        <label>Год до <input type="number" name="year_max" value="{{ request.query_params.get('year_max','') }}"
+                min="1980" max="3000"></label>
+        <label>Цена от <input type="number" name="price_min" value="{{ request.query_params.get('price_min','') }}"
+                min="10" max="100000000"></label>
+        <label>Цена до <input type="number" name="price_max" value="{{ request.query_params.get('price_max','') }}"
+                min="10" max="100000000"></label>
+        <label>Пробег до (км) <input type="number" name="mileage_max"
+                value="{{ request.query_params.get('mileage_max','') }}" min="10" max="1000000"></label>
+        <label>Мощность от (л.с.) <input type="number" name="power_min"
+                value="{{ request.query_params.get('power_min', '') }}" min="10" max="1000"></label>
+    </div>
+
+    <input type="hidden" name="sort" id="sortHidden" value="{{ sort }}" />
+    <input type="hidden" name="page" id="pageHidden" value="{{ page }}" />
+
+    <div>
+        <button type="submit">Применить фильтры</button>
+        <a href="/admin/cars">Сбросить фильтры</a>
+    </div>
+</form>
+
+<div>
+    <div>
+        <table>
+            <thead>
+                <tr>
+                    {% set headers = [
+                    ('brand','Бренд'),
+                    ('model','Модель'),
+                    ('year','Год'),
+                    ('price','Цена'),
+                    ('body_type','Кузов'),
+                    ('mileage','Пробег'),
+                    ('power','Мощн.'),
+                    ('fuel','Топливо'),
+                    ('transmission','КПП'),
+                    ] %}
+                    {% for key,label in headers %}
+                    {% set indicator = '' %}
+                    {% if sort and sort.startswith(key + '.') %}
+                    {% set dir = sort.split('.',2)[1] if '.' in sort else 'asc' %}
+                    {% set indicator = '▲' if dir=='asc' else '▼' %}
+                    {% endif %}
+                    <th><button class="sort-btn" data-col="{{ key }}">{{ label }}<span>{{ indicator }}</span></button>
+                    </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for car in cars %}
+                <tr>
+                    <td>{{ car.brand }}</td>
+                    <td>{{ car.model }}</td>
+                    <td>{{ car.year }}</td>
+                    <td>{{ "{:,.0f}".format(car.price) | replace(",", " ") }}</td>
+                    <td>{{ car.body_type }}</td>
+                    <td>{{ "{:,.0f}".format(car.mileage) | replace(",", " ") }}</td>
+                    <td>{{ car.power }}</td>
+                    <td>{{ car.fuel }}</td>
+                    <td>{{ car.transmission }}</td>
+                    <td>
+                        <a href="/admin/cars/{{ car.id }}/edit">✏️</a>
+                        <form method="post" action="/admin/cars/{{ car.id }}/delete"
+                            onsubmit="return confirm('Удалить автомобиль?')">
+                            <button>🗑</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+{% if pages > 1 %}
+{% set start = page - 2 if page - 2 > 1 else 1 %}
+{% set end = page + 2 if page + 2 < pages else pages %} <div>
+    <button type="button" class="page-btn" data-page="{{ page-1 }}" {% if page <=1 %}disabled{% endif %}>
+        ← Пред.
+    </button>
+
+    {% if start > 1 %}
+    <button type="button" class="page-btn" data-page="1">1</button>
+    {% if start > 2 %}<span>…</span>{% endif %}
+    {% endif %}
+
+    {% for p in range(start, end + 1) %}
+    <button type="button" class="page-btn" data-page="{{ p }}" {% if p==page %}disabled{% endif %}>
+        {{ p }}
+    </button>
+    {% endfor %}
+
+    {% if end < pages %} {% if end < pages - 1 %}<span>…</span>{% endif %}
+        <button type="button" class="page-btn" data-page="{{ pages }}">{{ pages }}</button>
+        {% endif %}
+
+        <button type="button" class="page-btn" data-page="{{ page+1 }}" {% if page>= pages %}disabled{% endif %}>
+            След. →
+        </button>
+
+        <span>Страница {{ page }} из {{ pages }}</span>
+        </div>
+        {% endif %}
+
+
+
+        <script>
+            const sortHidden = document.getElementById('sortHidden');
+            const btns = document.querySelectorAll('.sort-btn');
+
+            btns.forEach(btn => {
+                btn.addEventListener('click', (ev) => {
+                    ev.preventDefault();
+                    const column = btn.dataset.col;
+                    const current = sortHidden.value;
+
+                    let next = '';
+                    if (current.startsWith(column + '.')) {
+                        const dir = current.split('.', 2)[1];
+                        if (dir === 'asc') next = column + '.desc';
+                        else next = '';
+                    } else next = column + '.asc';
+
+                    sortHidden.value = next;
+                    sortHidden.closest('form').submit();
+                });
+            });
+
+            // Пагинация
+            const pageHidden = document.getElementById('pageHidden');
+            document.querySelectorAll('.page-btn').forEach(btn => {
+                btn.addEventListener('click', (ev) => {
+                    ev.preventDefault();
+                    const target = parseInt(btn.dataset.page, 10);
+                    if (!isNaN(target) && target >= 1) {
+                        pageHidden.value = target;
+                        pageHidden.closest('form').submit();
+                    }
+                });
+            });
+        </script>
+
+        {% endblock %}

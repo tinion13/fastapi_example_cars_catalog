@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Беседы пользователей</h1>
+<table>
+  <thead>
+    <tr>
+      <th>User ID</th>
+      <th>Username</th>
+      <th>Last message</th>
+      <th>Действие</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% if conversations %}
+      {% for conversation in conversations %}
+        <tr>
+          <td>{{ conversation._user.id }}</td>
+          <td>{{ conversation._user.username }}</td>
+          <td>{{ conversation.last }}</td>
+          <td><a href="/admin/conversations/{{ conversation._user.id }}">Открыть</a></td>
+        </tr>
+      {% endfor %}
+    {% else %}
+    <tr>
+      <td colspan="5">Нет бесед.</td>
+    </tr>
+    {% endif %}
+  </tbody>
+</table>
+
+<p><a href="/admin">Назад</a></p>
+{% endblock %}

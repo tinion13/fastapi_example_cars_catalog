@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>
+  {% if mode == 'edit' %}
+    Редактировать автомобиль
+  {% else %}
+    Добавить новый автомобиль
+  {% endif %}
+</h1>
+
+{% set action_url = "/admin/cars/" ~ car.id ~ "/edit" if mode == "edit" else "/admin/cars/new" %}
+
+<div class="car-editor" data-action="{{ action_url }}">
+  <label>Бренд
+    <input id="brand" name="brand" value="{{ car.brand }}">
+  </label>
+
+  <label>Модель
+    <input id="model" name="model" value="{{ car.model }}">
+  </label>
+
+  <label>Год
+    <input id="year" type="number" name="year" value="{{ car.year }}">
+  </label>
+
+  <label>Цена
+    <input id="price" type="number" name="price" value="{{ car.price }}">
+  </label>
+
+  <label>Тип кузова
+    <input id="body_type" name="body_type" value="{{ car.body_type }}">
+  </label>
+
+  <label>Топливо
+    <input id="fuel" name="fuel" value="{{ car.fuel }}">
+  </label>
+
+  <label>КПП
+    <input id="transmission" name="transmission" value="{{ car.transmission }}">
+  </label>
+
+  <label>Пробег
+    <input id="mileage" type="number" name="mileage" value="{{ car.mileage }}">
+  </label>
+
+  <label>Мощность (л.с.)
+    <input id="power" type="number" name="power" value="{{ car.power }}">
+  </label>
+
+  <div style="margin-top: 12px;">
+    <button id="saveBtn" type="button">
+      {% if mode == 'edit' %}Сохранить{% else %}Создать{% endif %}
+    </button>
+    <a href="/admin/cars">Отмена</a>
+  </div>
+</div>
+
+<script>
+(function () {
+  const root = document.querySelector(".car-editor");
+  const action = root.dataset.action;
+  const errorBox = document.getElementById("errorBox");
+  const saveBtn = document.getElementById("saveBtn");
+
+  function readValue(id) {
+    return document.getElementById(id).value;
+  }
+
+  function toIntOrNull(v) {
+    if (v === "" || v === null || v === undefined) return null;
+    const n = parseInt(v, 10);
+    return Number.isNaN(n) ? null : n;
+  }
+
+  function toFloatOrNull(v) {
+    if (v === "" || v === null || v === undefined) return null;
+    const n = Number(v);
+    return Number.isNaN(n) ? null : n;
+  }
+
+  saveBtn.addEventListener("click", async () => {
+    errorBox.textContent = "";
+
+    const payload = {
+      brand: readValue("brand"),
+      model: readValue("model"),
+      body_type: readValue("body_type"),
+      fuel: readValue("fuel"),
+      transmission: readValue("transmission"),
+      year: toIntOrNull(readValue("year")),
+      price: toFloatOrNull(readValue("price")),
+      mileage: toIntOrNull(readValue("mileage")),
+      power: toIntOrNull(readValue("power")),
+    };
+
+    const response = await fetch(action, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const contentType = response.headers.get("content-type") || "";
+
+    if (response.redirected) {
+      window.location.href = response.url;
+      return;
+    }
+
+    if (contentType.includes("application/json")) {
+      const data = await response.json();
+      if (!response.ok) { console.log("Ошибка JSON", data); return; }
+      console.log("Успех JSON", data);
+      return;
+    }
+
+    if (contentType.includes("text/html")) {
+      const html = await response.text();
+      document.open();
+      document.write(html);
+      document.close();
+      return;
+    }
+  });
+})();
+</script>
+
+{% endblock %}

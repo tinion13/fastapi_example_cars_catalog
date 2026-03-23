@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+  <div>
+        <h1>Ошибка {{ status_code }} — Некорректные данные</h1>
+    <p>Пожалуйста, исправьте следующие поля:</p>
+    <ul>
+    {% for err in detail %}
+        <li><strong>{{ err.loc | join(".") }}</strong>: {{ err.msg }}</li>
+    {% endfor %}
+    </ul>
+    <a href="{{ request.headers.get('referer', '/cars') }}">Вернуться назад</a>
+  </div>
+{% endblock %}

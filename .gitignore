@@ -1,13 +1,12 @@
 __pycache__
 .vscode
-.python-version
 .ruff_cache
 
 .venv*
 .env*
 
-temp*
-test*
+temp_*
+test_*
 
 *.log
 

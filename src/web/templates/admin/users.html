@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Пользователи</h1>
+
+{% if error %}
+<p>{{ error }}</p>
+{% endif %}
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Email</th>
+      <th>Username</th>
+      <th>is_admin</th>
+      <th>Действие</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for _user in users %}
+    <tr>
+      <td>{{ _user.id }}</td>
+      <td>{{ _user.email }}</td>
+      <td>{{ _user.username }}</td>
+      <td>{{ 'Yes' if _user.is_admin else 'No' }}</td>
+      <td>
+        {% if admin.id != _user.id %}
+          <form method="post" action="/admin/users/{{ _user.id }}/toggle">
+            <button type="submit">{% if _user.is_admin %}Сделать обычным{% else %}Сделать админом{% endif %}</button>
+          </form>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<p><a href="/admin">Назад</a></p>
+{% endblock %}

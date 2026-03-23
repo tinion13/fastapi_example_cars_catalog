@@ -5,9 +5,9 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from core.consts import STATIC_DIR, TEMPLATES_DIR
 from core.errors_pages_setup import setup_error_handlers
 from core.master_router import router as master_router
+from core.paths import STATIC_DIR, TEMPLATES_DIR
 from db.models import Base
 from db.session import engine
 from services.auth_service import AuthService
@@ -18,10 +18,9 @@ async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-    service = AuthService()
-    app.state.service = service
-    templates = Jinja2Templates(directory=TEMPLATES_DIR)
-    app.state.templates = templates
+    app.state.service = AuthService()
+
+    app.state.templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
     yield
     await engine.dispose()

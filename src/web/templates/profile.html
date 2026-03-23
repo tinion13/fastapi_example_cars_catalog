@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Профиль</h1>
+<div>
+  <p><b>ID:</b> {{ user.id }}</p>
+  <p><b>Email:</b> {{ user.email }}</p>
+  <p><b>Имя пользователя:</b> {{ user.username }}</p>
+</div>
+<form method="post" action="/profile">
+  <input type="text" name="username" value="{{ user.username }}">
+  <button type="submit">Сменить имя</button>
+</form>
+
+{% if error %}
+<p>{{ error }}</p>
+{% endif %}
+{% if success %}
+<p>{{ success }}</p>
+{% endif %}
+
+<h2>Избранное</h2>
+{% if fav_cars %}
+<div>
+  <div>
+    <table>
+      <thead>
+        <tr>
+          {% set headers = [
+            ('brand','Бренд'),
+            ('model','Модель'),
+            ('year','Год'),
+            ('price','Цена'),
+            ('body_type','Кузов'),
+            ('mileage','Пробег'),
+            ('power','Мощн.'),
+            ('fuel','Топливо'),
+            ('transmission','КПП'),
+          ] %}
+          {% for key,label in headers %}
+            <th>{{ label }}</th>
+          {% endfor %}
+          <th>★</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in fav_cars %}
+          <tr>
+            <td>{{ c.brand }}</td>
+            <td>{{ c.model }}</td>
+            <td>{{ c.year }}</td>
+            <td>{{ "{:,.0f}".format(c.price) | replace(",", " ") }}</td>
+            <td>{{ c.body_type }}</td>
+            <td>{{ "{:,.0f}".format(c.mileage) | replace(",", " ") }}</td>
+            <td>{{ c.power }}</td>
+            <td>{{ c.fuel }}</td>
+            <td>{{ c.transmission }}</td>
+            <td>
+              <button class="fav-btn" data-id="{{ c.id }}" aria-label="favorite">
+                ❤️
+              </button>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<p>У вас пока нет избранных автомобилей.</p>
+{% endif %}
+
+<script>
+  document.querySelectorAll('.fav-btn').forEach(btn => {
+    btn.addEventListener('click', async (ev) => {
+      ev.preventDefault();
+      const id = btn.dataset.id;
+      const res = await fetch(`/cars/${id}/favorite`, {method:'POST'});
+      if (res.ok) {
+        const data = await res.json();
+        btn.textContent = data.favorite ? '❤️' : '🤍';
+      } else if (res.status === 401) {
+        window.location.href = '/login';
+      }
+    });
+  });
+</script>
+{% endblock %}
