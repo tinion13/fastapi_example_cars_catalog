@@ -1,0 +1,10 @@
+services:
+  app:
+    build:
+      context: .
+      args:
+        INSTALL_DEV: "false"
+    container_name: app_cars_catalog
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
