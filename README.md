@@ -18,11 +18,12 @@
 ## Стек
 
 - **Python3.12**
+- **Docker**
 - **FastAPI**
 - **Uvicorn**
 -  **Pydantic**
 - **SQLAlchemy**
-- **SQLite**
-- **aiosqlite**
+- **PostgreSQL**
+- **asyncpg**
 
 
