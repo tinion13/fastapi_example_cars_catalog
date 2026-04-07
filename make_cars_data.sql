@@ -1,4 +1,4 @@
-WITH 
+WITH
 brands_models(id, brand, model) AS (
     VALUES 
     (1,'Toyota','Camry'), (2,'Toyota','Corolla'),
@@ -18,39 +18,56 @@ brands_models(id, brand, model) AS (
     (29,'Jeep','Cherokee'), (30,'Mitsubishi','Outlander')
 ),
 bodies(id, body_type) AS (
-    VALUES (1,'седан'),(2,'хэтчбек'),(3,'внедорожник'),
-    (4,'универсал'),(5,'купе'),(6,'лифтбек')
+    VALUES
+    (1,'седан'),
+    (2,'хэтчбек'),
+    (3,'внедорожник'),
+    (4,'универсал'),
+    (5,'купе'),
+    (6,'лифтбек')
 ),
 fuels(id, fuel) AS (
-    VALUES (1,'бензин'),(2,'дизель'),(3,'гибрид'),(4,'электро'),(5,'газ')
+    VALUES
+    (1,'бензин'),
+    (2,'дизель'),
+    (3,'гибрид'),
+    (4,'электро'),
+    (5,'газ')
 ),
 trans(id, transmission) AS (
-    VALUES (1,'автомат'),(2,'механика'),(3,'вариатор'),(4,'робот')
-),
-params(n) AS (VALUES (300)),
-seq(i) AS (
-    SELECT 1 FROM params 
-    UNION ALL 
-    SELECT i+1 FROM seq, params WHERE i+1 <= (SELECT n FROM params)
+    VALUES
+    (1,'автомат'),
+    (2,'механика'),
+    (3,'вариатор'),
+    (4,'робот')
 ),
 cars_data AS (
     SELECT 
         bm.brand,
         bm.model,
-        1995 + ABS(RANDOM()) % 30 AS year,
-        10000000 + ABS(RANDOM()) % 109900000 AS price,
+        1995 + floor(random() * 30)::int AS year,
+        10000000 + floor(random() * 109900000)::int AS price,
         b.body_type,
-        ABS(RANDOM()) % 400001 AS mileage,
-        50 + ABS(RANDOM()) % 451 AS power,
+        floor(random() * 400001)::int AS mileage,
+        50 + floor(random() * 451)::int AS power,
         f.fuel,
         t.transmission
-    FROM seq AS rid
+    FROM generate_series(1, 300) AS rid(i)
     JOIN brands_models AS bm ON bm.id = ((rid.i - 1) % 30) + 1
-    JOIN bodies AS b ON b.id = ((rid.i * 1 - 1) % 6) + 1
+    JOIN bodies AS b ON b.id = ((rid.i - 1) % 6) + 1
     JOIN fuels AS f ON f.id = ((rid.i * 7 - 1) % 5) + 1
     JOIN trans AS t ON t.id = ((rid.i * 11 - 1) % 4) + 1
-    order by random()
+    ORDER BY random()
 )
-INSERT INTO cars (brand, model, year, price, body_type, mileage, power, fuel, transmission)
+INSERT INTO cars (
+    brand,
+    model,
+    year,
+    price,
+    body_type,
+    mileage,
+    power,
+    fuel,
+    transmission
+)
 SELECT * FROM cars_data;
-

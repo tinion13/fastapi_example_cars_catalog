@@ -9,5 +9,3 @@ temp_*
 test_*
 
 *.log
-
-app.db

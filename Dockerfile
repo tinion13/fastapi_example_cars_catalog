@@ -20,7 +20,6 @@ RUN if [ "$INSTALL_DEV" = "true" ]; then \
     fi
 
 COPY ./src ./src
-COPY ./app.db .
 
 RUN if [ "$INSTALL_DEV" = "true" ]; then \
       uv sync --frozen; \
